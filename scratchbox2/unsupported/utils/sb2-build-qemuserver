@@ -7,6 +7,9 @@ function error_not_inside_sb2()
 	exit 1
 }
 
+
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+
 if [ -z "$SBOX_SESSION_DIR" ]
 then
 	error_not_inside_sb2
@@ -14,18 +17,18 @@ fi
 
 . $SBOX_SESSION_DIR/sb2-session.conf
 
-. ~/.scratchbox2/config
+. $SBOX_HOME_DIR/.scratchbox2/config
 
 [ ! -z "$sbox_target" ] || sbox_target=$DEFAULT_TARGET
 
-. ~/.scratchbox2/$sbox_target/sb2.config
+. $SBOX_HOME_DIR/.scratchbox2/$sbox_target/sb2.config
 
 # Read in primary toolchain config, if it has been defined;
 # SBOX_CROSS_* variables are there nowadays
-if [ -f $HOME/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh ]; then
-	. $HOME/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh 
+if [ -f $SBOX_HOME_DIR/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh ]; then
+	. $SBOX_HOME_DIR/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh 
 else
-	echo "$HOME/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh does not exist;"
+	echo "$SBOX_HOME_DIR/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh does not exist;"
 	echo "Can't build qemuserver"
 	exit 1
 fi

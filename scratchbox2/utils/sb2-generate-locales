@@ -3,16 +3,16 @@
 # Copyright (C) 2008 Nokia Corporation.
 # Licensed under GPL version 2
 #
-# Generate locale definition files under $HOME/.scratchbox2/ in extracted
+# Generate locale definition files under $SBOX_HOME_DIR/.scratchbox2/ in extracted
 # form.  We need to do this because otherwise it is impossible to map
 # locales under sb2 to correct target using environment variable
 # $LOCPATH.  This script can be used to generate locales for targets
 # and tools.
 #
 # For target locales the generated files are placed under:
-#     $HOME/.scratchbox2/$sbox_target/locales
+#     $SBOX_HOME_DIR/.scratchbox2/$sbox_target/locales
 # and for tools the place is:
-#     $HOME/.scratchbox2/<BASENAME OF TOOLS ROOT>/locales.
+#     $SBOX_HOME_DIR/.scratchbox2/<BASENAME OF TOOLS ROOT>/locales.
 #
 # $LOCPATH is the only way to change path of locale files when using
 # glibc (other systems use $NLSPATH but we don't need to do this extraction
@@ -126,6 +126,9 @@ error_not_inside_sb2()
 	exit 1
 }
 
+
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+
 if [ -z "$SBOX_SESSION_DIR" ]; then
 	error_not_inside_sb2
 fi
@@ -161,13 +164,13 @@ done
 if [ $tools -eq 1 ]; then
 	rootdir="$sbox_tools_root"
 	tools_basename=`/usr/bin/basename $rootdir`
-	localedir="$HOME/.scratchbox2/$tools_basename/locales"
+	localedir="$SBOX_HOME_DIR/.scratchbox2/$tools_basename/locales"
 else
 	if [ $force -eq 0 -a -n "$sbox_cputransparency_method" ]; then
 		exit 0
 	fi
 	rootdir="$sbox_target_root"
-	localedir="$HOME/.scratchbox2/$sbox_target/locales"
+	localedir="$SBOX_HOME_DIR/.scratchbox2/$sbox_target/locales"
 fi
 
 generate_localization_files $rootdir $localedir $force

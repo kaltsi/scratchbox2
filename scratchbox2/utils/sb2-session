@@ -13,7 +13,8 @@
 #
 prog="$0"
 progbase=`basename $0`
-session_save_dir="$HOME/.scratchbox2/saved_sessions"
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+session_save_dir="$SBOX_HOME_DIR/.scratchbox2/saved_sessions"
 
 usage()
 {

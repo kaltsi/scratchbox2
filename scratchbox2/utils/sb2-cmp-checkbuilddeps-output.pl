@@ -25,7 +25,7 @@ my $both_required=$ARGV[2];
 my $accepted_from_tools=$ARGV[3];
 my $ignored_from_tools=$ARGV[4];
 
-my $scratchbox2_dir = $ENV{'HOME'}."/.scratchbox2";
+my $scratchbox2_dir = $ENV{'SBOX_HOME_DIR'}."/.scratchbox2";
 
 my $verbose_messages_env_var=$ENV{'SBOX_CHECKBUILDDEPS_VERBOSE'};
 my $sbox_target=$ENV{'SBOX_TARGET'};

@@ -182,7 +182,7 @@ function check_gcc_dependency()
 	required_gcc=$1
 	prefix="$2"
 
-	if [ -f $HOME/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh ]
+	if [ -f $SBOX_HOME_DIR/.scratchbox2/$sbox_target/sb2.config.d/gcc.config.sh ]
 	then
 		# a cross compiler has been configured
 		if [ "$required_gcc" = "gcc" ]
@@ -201,7 +201,7 @@ function check_gcc_dependency()
 		# Find out if gcc version is suitable, try all configured
 		# toolchains
 		for gcc_conf_file in \
-			$HOME/.scratchbox2/$sbox_target/sb2.config.d/gcc*.config.sh
+			$SBOX_HOME_DIR/.scratchbox2/$sbox_target/sb2.config.d/gcc*.config.sh
 		do
 			if [ -f $gcc_conf_file ]; then
 				. $gcc_conf_file
@@ -433,6 +433,8 @@ function compare_target_and_host_results_with_new_tool()
 	####	result2="fail"
 	####fi
 }
+
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
 
 # First, make sure we are in a correct directory:
 if [ ! -f debian/control ]

@@ -30,6 +30,8 @@ Options:
     -d TARGETNAME     set default scratchbox2 target
     -t TARGETNAME     set scratchbox2 target to configure
     -h                print this help
+    -H dir            Use dir as the sb2 home directory where the target
+                      configuration files are saved
     -v                display version
 
 Commands:
@@ -57,11 +59,11 @@ function list_targets()
 {
 	local all_targets=$1
 
-	if [ ! -d $HOME/.scratchbox2 ]; then
-		echo "$HOME/.scratchbox2 missing, create some targets with sb2-init!" >&2
+	if [ ! -d $SBOX_HOME_DIR/.scratchbox2 ]; then
+		echo "$SBOX_HOME_DIR/.scratchbox2 missing, create some targets with sb2-init!" >&2
 		exit 1
 	fi
-	list=$(find $HOME/.scratchbox2/ -maxdepth 2 -mindepth 2 \
+	list=$(find $SBOX_HOME_DIR/.scratchbox2/ -maxdepth 2 -mindepth 2 \
 		-type f -and -name "sb2.config" 2>/dev/null | sort)
 	if [ $? != 0 ]; then
 		echo "Error occured while getting list of targets" >&2
@@ -89,17 +91,17 @@ function show_config_log()
 
 	if [ "$target" == "-" ]; then
 		# use default target
-		if [ ! -f $HOME/.scratchbox2/config ]; then
+		if [ ! -f $SBOX_HOME_DIR/.scratchbox2/config ]; then
 			echo "default target has not been set!" >&2
 			exit 1
 		fi
-		. $HOME/.scratchbox2/config
+		. $SBOX_HOME_DIR/.scratchbox2/config
 		target=$DEFAULT_TARGET
 		echo "Configuration log of '$target'"
 	fi
-	SBOX_CONFIG_DIR=$HOME/.scratchbox2/$target/sb2.config.d
+	SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$target/sb2.config.d
 
-	if [ ! -d $HOME/.scratchbox2/$target ]; then
+	if [ ! -d $SBOX_HOME_DIR/.scratchbox2/$target ]; then
 		echo "target $target does not exist!" >&2
 		exit 1
 	fi
@@ -118,7 +120,7 @@ function write_config()
 {
 	echo "
 DEFAULT_TARGET=$DEFAULT_TARGET
-" > $HOME/.scratchbox2/config
+" > $SBOX_HOME_DIR/.scratchbox2/config
 	log_config_action "sb2-config: this is now the default target."
 }
 
@@ -182,6 +184,8 @@ function showenv_vars()
 	# else there are none.
 }
 
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+
 SBOX_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
 WRITE_CONFIG=0
 
@@ -190,7 +194,10 @@ if [ $# == 0 ]; then
 	usage
 fi
 
-while getopts d:fhlL:vt: foo
+LIST_ALL_TARGETS=
+LIST_FOUND_TARGETS=
+
+while getopts d:fhlL:vt:H: foo
 do
 	case $foo in
 	(d) DEFAULT_TARGET=$OPTARG
@@ -198,28 +205,32 @@ do
 	    WRITE_CONFIG=1
 	    ;;
 	(h) usage ;;
-	(l) list_targets 1;;
-	(f) list_targets 0;;
+	(l) LIST_ALL_TARGETS=1 ;;
+	(f) LIST_FOUND_TARGETS=1 ;;
 	(L) show_config_log $OPTARG ;; # Deprecated! use command 'showlog' instead
 	(t) targetname=$OPTARG ;;
+	(H) export SBOX_HOME_DIR="$OPTARG" ;;
 	(v) version ;;
 	(*) usage ;;
 	esac
 done
 shift $(($OPTIND - 1))
 
+[ -n "$LIST_ALL_TARGETS" ] &&  list_targets 1
+[ -n "$LIST_FOUND_TARGETS" ] &&  list_targets 0
+
 # Use the default target if "-t target" was not used
 if [ -z "$targetname" ]; then
-	if [ ! -f $HOME/.scratchbox2/config ]; then
+	if [ ! -f $SBOX_HOME_DIR/.scratchbox2/config ]; then
 		echo "default target has not been set!" >&2
 		exit 1
 	fi
-	. $HOME/.scratchbox2/config
+	. $SBOX_HOME_DIR/.scratchbox2/config
 	targetname=$DEFAULT_TARGET
 fi
 
 # log_config_action can be used after this, it requires SBOX_CONFIG_DIR
-SBOX_CONFIG_DIR=$HOME/.scratchbox2/$targetname/sb2.config.d
+SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$targetname/sb2.config.d
 
 if [ $WRITE_CONFIG == 1 ]; then
 	write_config
@@ -231,7 +242,7 @@ if [ -z "$command" ]; then
 fi
 shift
 
-if [ ! -d $HOME/.scratchbox2/$targetname ]; then
+if [ ! -d $SBOX_HOME_DIR/.scratchbox2/$targetname ]; then
 	echo "target $targetname does not exist!" >&2
 	exit 1
 fi

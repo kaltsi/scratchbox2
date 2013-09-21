@@ -357,7 +357,7 @@ emulate_mode_rules = {
 		-- the path where it is found.  For example gdb needs access
 		-- to the library and dynamic linker, and these may be in
 		-- target_root, or under sbox_dir.."/lib/libsb2", or
-		-- under ~/.scratchbox2.
+		-- under $SBOX_HOME_DIR/.scratchbox2.
 		{dir = sbox_dir .. "/lib/libsb2",
 		 actions = test_first_target_then_host_default_is_target},
 

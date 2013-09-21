@@ -80,6 +80,8 @@ Options:
     -q           quiet; don't print debugging details to stdout etc.
     -N           Do not delete the session dir even if sb2 script fails to
                  enter the session
+    -H dir       Use dir as the sb2 home directory where the target
+                 configuration files are saved
     -x OPTIONS   specify additional options for "sb2d"
 
 Examples:
@@ -201,8 +203,8 @@ function add_auto_rules_to_mapping_rules()
 function set_and_check_SBOX_TARGET()
 {
 	if [ -z "$SBOX_TARGET" ]; then
-		if [ -r ~/.scratchbox2/config ]; then
-			. ~/.scratchbox2/config
+		if [ -r $SBOX_HOME_DIR/.scratchbox2/config ]; then
+			. $SBOX_HOME_DIR/.scratchbox2/config
 		fi
 		SBOX_TARGET=$DEFAULT_TARGET
 	fi
@@ -211,7 +213,7 @@ function set_and_check_SBOX_TARGET()
 		exit_error "No target specified and none set as default, aborting."
 	fi
 
-	if [ ! -e ~/.scratchbox2/$SBOX_TARGET/sb2.config ]; then
+	if [ ! -e $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config ]; then
 		exit_error "Invalid target specified, aborting."
 	fi
 }
@@ -227,7 +229,7 @@ function load_configuration()
 	# configuration file, "sb2.config". It is created by "sb2-init"
 
 	saved_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-	. ~/.scratchbox2/$SBOX_TARGET/sb2.config
+	. $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config
 
 	if [ ! -d "$SBOX_TARGET_ROOT" ]; then
 	    exit_error "Cannot access target root '$SBOX_TARGET_ROOT', aborting."
@@ -271,7 +273,7 @@ function load_configuration()
 	
 	# check if we need to upgrade configuration:
 	if [ -z "$OPT_DONT_UPGRADE_CONFIGURATION" ]; then
-		if [ ! -f ~/.scratchbox2/$SBOX_TARGET/sb2.config.d/config-stamp.20 ]; then
+		if [ ! -f $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/config-stamp.20 ]; then
 			$SBOX_DIR/share/scratchbox2/scripts/sb2-upgrade-config \
 				$SBOX_TARGET
 			if [ $? != 0 ]; then
@@ -283,8 +285,8 @@ function load_configuration()
 
 	#-----------
 	# Read in primary toolchain config, if it has been defined
-	if [ -f $HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d/gcc.config.sh ]; then
-		. $HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d/gcc.config.sh
+	if [ -f $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/gcc.config.sh ]; then
+		. $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/gcc.config.sh
 	fi
 	# attempt to make SBOX_CPUTRANSPARENCY_METHOD path absolute
 	# and remove symlinks from it
@@ -329,22 +331,22 @@ function load_configuration()
 	# Time to set LD_LIBRARY_PATH for host-compatible programs:
 
 	# The config file must exist now (sb2-upgrade-config created it)
-	if [ ! -f $HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d/host-ld_library_path.conf ]; then
+	if [ ! -f $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/host-ld_library_path.conf ]; then
 		echo "Fatal: Failed to get components of LD_LIBRARY_PATH"
 		exit 1
 	fi
 	
-	. $HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d/host-ld_library_path.conf
+	. $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/host-ld_library_path.conf
 
 	LD_LIBRARY_PATH="$HOST_LD_LIBRARY_PATH_PREFIX$HOST_LD_LIBRARY_PATH_LIBSB2$HOST_LD_LIBRARY_PATH_SUFFIX"
 
 	#-----------
 	# Get values for the DEB_* variables from the new config file:
-	if [ ! -f $HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d/debian.conf ]; then
+	if [ ! -f $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/debian.conf ]; then
 		echo "Fatal: Failed to get Debian build system variables (config file does not exist)"
 		exit 1
 	fi
-	. $HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d/debian.conf
+	. $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/debian.conf
 }
 
 #
@@ -421,7 +423,7 @@ function sboxify_environment()
 			exit_error "Don't know how to create target root from '$OPT_CLONE_TARGET_ROOT_FROM'"
 		fi
 	else
-		SB2_TEMP_DPKG_ADMIN_DIR=$HOME/.scratchbox2/$SBOX_TARGET/tmp-pkg-db.$SBOX_MAPMODE
+		SB2_TEMP_DPKG_ADMIN_DIR=$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/tmp-pkg-db.$SBOX_MAPMODE
 	fi
 
 	# Default network rules; can be overridden from sb2rc
@@ -439,7 +441,7 @@ function sboxify_environment()
 	fi
 
 	if [ ! -n "$SBOX_DIR" ]; then
-		exit_error "Incorrect target config in ~/.scratchbox2/$SBOX_TARGET/sb2.config"
+		exit_error "Incorrect target config in $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config"
 	fi
 
 	# This refers to the primary toolchain.
@@ -451,7 +453,7 @@ function sboxify_environment()
 		# /sb2/wrappers and /sb2/scripts contain utilities for
 		# development support, and are available in the
 		# software development modes ("simple" and "devel")
-	    TMP_PATH=/sb2/wrappers:/sb2/scripts:$HOME/.scratchbox2/$SBOX_TARGET/bin
+	    TMP_PATH=/sb2/wrappers:/sb2/scripts:$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/bin
 	    if [ ! -z "$CCACHE_TOOLS_PATH" ]; then
 		TMP_PATH=$TMP_PATH:$CCACHE_TOOLS_PATH
 	    fi
@@ -544,8 +546,8 @@ function initialize_sb_logging()
 # up the environment, which can't be used yet)
 function create_common_sb2_conf_file_for_session()
 {
-	sbox_user_home_dir=$HOME
-	if [ -z "$HOME" ]; then
+	sbox_user_home_dir=$SBOX_HOME_DIR
+	if [ -z "$SBOX_HOME_DIR" ]; then
 		sbox_user_home_dir="/home/unknown_user"
 	fi
 
@@ -595,7 +597,7 @@ END
 # up the environment, which can't be used yet)
 function create_gcc_conf_file_for_session()
 {
-	gcc_config_files=`ls ~/.scratchbox2/$SBOX_TARGET/sb2.config.d/gcc.config*.lua 2>/dev/null`
+	gcc_config_files=`ls $SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d/gcc.config*.lua 2>/dev/null`
 	if [ -n "$gcc_config_files" ] ; then
 		# Create the configuration file. Do some variable substitutions:
 		# "extra_cross_compiler_args" and "extra_cross_ld_args"
@@ -1144,8 +1146,8 @@ END
 		tools_basename=`basename $SBOX_TOOLS_ROOT`
 		write_ld_library_path_replacement_to_exec_config \
 			$SBOX_TOOLS_ROOT conf_tools_ld_so_library_path \
-			~/.scratchbox2/libsb2/tools/$target_basename/$library_interface/libsb2.so.1 \
-			~/.scratchbox2/libsb2/tools/$library_interface/libsb2.so.1 \
+			$SBOX_HOME_DIR/.scratchbox2/libsb2/tools/$target_basename/$library_interface/libsb2.so.1 \
+			$SBOX_HOME_DIR/.scratchbox2/libsb2/tools/$library_interface/libsb2.so.1 \
 			$SBOX_DIR/lib/libsb2/tools/$tools_basename/$library_interface/libsb2.so.1 \
 			$SBOX_DIR/lib/libsb2/tools/$library_interface/libsb2.so.1 \
 			$SBOX_TOOLS_ROOT/usr/lib/libsb2/libsb2.so.1
@@ -1160,7 +1162,7 @@ END
 
 		write_locale_and_gconv_paths_to_exec_config \
 			$SBOX_TOOLS_ROOT \
-			$HOME/.scratchbox2/$tools_basename/locales \
+			$SBOX_HOME_DIR/.scratchbox2/$tools_basename/locales \
 			conf_tools_locale_path \
 			conf_tools_gconv_path
 
@@ -1204,8 +1206,8 @@ END
 
 		write_ld_library_path_replacement_to_exec_config \
 			$SBOX_TARGET_ROOT conf_target_ld_so_library_path \
-			~/.scratchbox2/libsb2/targets/$target_basename/$library_interface/libsb2.so.1 \
-			~/.scratchbox2/libsb2/targets/$library_interface/libsb2.so.1 \
+			$SBOX_HOME_DIR/.scratchbox2/libsb2/targets/$target_basename/$library_interface/libsb2.so.1 \
+			$SBOX_HOME_DIR/.scratchbox2/libsb2/targets/$library_interface/libsb2.so.1 \
 			$SBOX_DIR/lib/libsb2/targets/$target_basename/$library_interface/libsb2.so.1 \
 			$SBOX_DIR/lib/libsb2/targets/$library_interface/libsb2.so.1 \
 			$SBOX_TARGET_ROOT/usr/lib/libsb2/libsb2.so.1
@@ -1220,7 +1222,7 @@ END
 
 		write_locale_and_gconv_paths_to_exec_config \
 			$SBOX_TARGET_ROOT \
-			$HOME/.scratchbox2/$SBOX_TARGET/locales \
+			$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/locales \
 			conf_target_locale_path \
 			conf_target_gconv_path
 	else
@@ -1602,6 +1604,9 @@ function print_session_logs()
 
 # ===================== MAIN PROGRAM =====================
 
+# first set the home dir for this sb2 invocation
+[ -z "$SBOX_HOME_DIR" ] && export SBOX_HOME_DIR=$HOME
+
 SBOX_MAPMODE=""
 NUM_MAPMODES=0
 SB2_INTERNAL_MAPMODES=""
@@ -1624,7 +1629,7 @@ VPERM_ROOT_PRIVILEGE_FLAG=""
 SB2D_OPTIONS=""
 OPT_DONT_DELETE_SESSION=""
 
-while getopts vdht:em:n:s:L:Q:M:ZrRU:pS:J:D:P:W:O:cC:T:uf:gG:B:b:qx:N foo
+while getopts vdht:em:n:s:L:Q:M:ZrRU:pS:J:D:P:W:O:cC:T:uf:gG:B:b:qx:NH: foo
 do
 	case $foo in
 	(v) show_version; exit 0;;
@@ -1664,6 +1669,7 @@ do
 	(q) export SBOX_QUIET="q";;
 	(x) SB2D_OPTIONS="$SB2D_OPTIONS $OPTARG" ;;
 	(N) OPT_DONT_DELETE_SESSION="y" ;;
+	(H) export SBOX_HOME_DIR="$OPTARG" ;;
 	(*) show_usage_and_exit ;;
 	esac
 done
@@ -1985,7 +1991,7 @@ if [ -d "$SBOX_SESSION_DIR/env_vars" ]; then
 	done
 fi
 
-SBOX_CONFIG_DIR=$HOME/.scratchbox2/$SBOX_TARGET/sb2.config.d
+SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d
 
 #
 # We need to start "trampoline" that is run under

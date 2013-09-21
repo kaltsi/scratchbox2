@@ -81,7 +81,8 @@ fi
 
 # ---------- end of parameter checks
 
-SBOX_CONFIG_DIR=~/.scratchbox2/$TARGET/sb2.config.d 
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$TARGET/sb2.config.d 
 
 # Handle recursive execution gracefully
 # (due to sb2-upgrade-config).

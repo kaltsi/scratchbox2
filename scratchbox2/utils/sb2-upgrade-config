@@ -16,10 +16,11 @@ if [ $(basename $my_path) != $(basename $0) ]; then
 	fi
 fi
 
+[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
 SBOX_SHARE_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
 SBOX_DIR=$(readlink -f $SBOX_SHARE_DIR/../..)
 SBOX_TARGET=$1
-SBOX_CONFIG_DIR=~/.scratchbox2/$SBOX_TARGET/sb2.config.d 
+SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d 
 
 function exit_error()
 {
@@ -41,7 +42,7 @@ function log_config_action()
 # the old configuration file; we only need three variables from that file..
 function get_sb2_init_arguments_from_old_config_file()
 {
-	OLD_CONFIG_FILE=$HOME/.scratchbox2/$SBOX_TARGET/sb2.config
+	OLD_CONFIG_FILE=$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config
 
 	if [ ! -f $OLD_CONFIG_FILE ]; then
 		exit_error "$OLD_CONFIG_FILE does not exist"
@@ -127,7 +128,7 @@ function update_host_ld_library_path()
 	# Suffix to be added (leading colon is needed, if not empty!)
 	HOST_LD_LIBRARY_PATH_SUFFIX=""
 
-	OLD_CONFIG_FILE=$HOME/.scratchbox2/$SBOX_TARGET/sb2.config
+	OLD_CONFIG_FILE=$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config
 
 	if [ ! -f $OLD_CONFIG_FILE ]; then
 		exit_error "$OLD_CONFIG_FILE does not exist"
