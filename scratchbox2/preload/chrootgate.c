@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "sb2.h"
 #include "libsb2.h"
+#include "sb2_stat.h"
 #include "exported.h"
 
 int chroot_gate(int *result_errno_ptr,

@@ -66,7 +66,9 @@ $(D)/privatewrappers.c: preload/interface.private preload/gen-interface.pl
 		-E preload/privatewrappers.h \
 		<$(SRCDIR)/preload/interface.private
 
-generated := preload/wrappers.c preload/exported.h preload/ldexportlist
+generated := preload/wrappers.c preload/exported.h preload/ldexportlist \
+	preload/privatewrappers.c preload/privatewrappers.h \
+	preload/libsb2_interface.7
 .PRECIOUS: $(generated)
 
 CLEAN_FILES += $(generated)

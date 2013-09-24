@@ -92,9 +92,12 @@ endif
 
 do-all: $(targets)
 
-.configure:
+.PHONY: autogen
+autogen:
+	./autogen.sh
+
+$(SRCDIR)/configure: autogen
 	$(SRCDIR)/configure $(CONFIGURE_ARGS)
-	@touch .configure
 
 .PHONY: .version
 .version:
@@ -109,11 +112,13 @@ do-all: $(targets)
 	fi)
 
 include/scratchbox2_version.h: .version Makefile
-	echo "/* Automatically generated file. Do not edit. */" >include/scratchbox2_version.h
-	echo '#define SCRATCHBOX2_VERSION "'`cat .version`'"' >>include/scratchbox2_version.h
-	echo '#define LIBSB2_SONAME "'$(LIBSB2_SONAME)'"' >>include/scratchbox2_version.h
+	$(P)GEN
+	$(Q)echo "/* Automatically generated file. Do not edit. */" >include/scratchbox2_version.h
+	$(Q)echo '#define SCRATCHBOX2_VERSION "'`cat .version`'"' >>include/scratchbox2_version.h
+	$(Q)echo '#define LIBSB2_SONAME "'$(LIBSB2_SONAME)'"' >>include/scratchbox2_version.h
 
-regular: .configure .version
+.PHONY: regular
+regular: configure .version
 	@$(MAKE) -f $(SRCDIR)/Makefile --include-dir=$(SRCDIR) SRCDIR=$(SRCDIR) do-all
 
 multilib:
@@ -249,6 +254,7 @@ do-install: install-noarch
 	$(Q)install -c -m 755 $(OBJDIR)/utils/sb2-show $(prefix)/bin/sb2-show
 	$(Q)install -c -m 755 $(OBJDIR)/utils/sb2-monitor $(prefix)/bin/sb2-monitor
 	$(Q)install -c -m 755 $(OBJDIR)/sb2d/sb2d $(prefix)/bin/sb2d
+	$(Q)install -c -D -m 644 $(OBJDIR)/utils/sb2.bash $(sysconfdir)/bash_completion.d/sb2.bash
 ifeq ($(OS),Linux)
 	$(Q)/sbin/ldconfig -n $(prefix)/lib/libsb2
 endif

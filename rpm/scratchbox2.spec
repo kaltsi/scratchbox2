@@ -27,14 +27,10 @@ Scratchbox2 preload library.
 %setup -q -n %{name}-%{version}/%{name}
 
 %build
-./autogen.sh
-./configure; touch .configure
 make
 
 %install
-make install prefix=%{buildroot}/usr
-
-install -D -m 644 utils/sb2.bash %{buildroot}/etc/bash_completion.d/sb2.bash
+make install prefix=%{buildroot}/usr sysconfdir=%{buildroot}%{_sysconfdir}
 
 %files
 %defattr(-,root,root)
