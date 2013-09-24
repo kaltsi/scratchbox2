@@ -32,6 +32,8 @@ Options:
     -h                print this help
     -H dir            Use dir as the sb2 home directory where the target
                       configuration files are saved
+    -Q                Query the sb2 home directory location
+    -V                when listing targets, indicate default target with a '*'
     -v                display version
 
 Commands:
@@ -58,11 +60,11 @@ function version()
 function list_targets()
 {
 	local all_targets=$1
-
 	if [ ! -d $SBOX_HOME_DIR/.scratchbox2 ]; then
 		echo "$SBOX_HOME_DIR/.scratchbox2 missing, create some targets with sb2-init!" >&2
 		exit 1
 	fi
+
 	list=$(find $SBOX_HOME_DIR/.scratchbox2/ -maxdepth 2 -mindepth 2 \
 		-type f -and -name "sb2.config" 2>/dev/null | sort)
 	if [ $? != 0 ]; then
@@ -73,13 +75,20 @@ function list_targets()
 		echo "No targets found, create some with sb2-init!" >&2
 		exit 1
 	fi
+	if [ ! -z "$OPT_VERBOSE" ] && [ -f $SBOX_HOME_DIR/.scratchbox2/config ]; then
+	    . $SBOX_HOME_DIR/.scratchbox2/config
+	fi
 	for f in $list; do
+	    local tgtname=$(basename $(dirname $f))
+
+	    [ z"$DEFAULT_TARGET" == z"$tgtname" ] && echo -n "* ";
+
 	    if [ $all_targets -ge 1 ]; then
-		echo $(basename $(dirname $f))
+		echo $tgtname
 	    else
 		. $f
 		if [ -d "$SBOX_TARGET_ROOT" ]; then
-		    echo $(basename $(dirname $f))
+		    echo $tgtname
 		fi
 	    fi
 	done
@@ -193,10 +202,13 @@ if [ $# == 0 ]; then
 	usage
 fi
 
-LIST_ALL_TARGETS=
-LIST_FOUND_TARGETS=
+OPT_LIST_ALL_TARGETS=
+OPT_LIST_FOUND_TARGETS=
+OPT_QUERY_HOME=
+OPT_VERBOSE=
+OPT_SHOW_CONFIG_LOG=
 
-while getopts d:fhlL:vt:H: foo
+while getopts d:fhlL:vt:H:VQ foo
 do
 	case $foo in
 	(d) DEFAULT_TARGET=$OPTARG
@@ -204,21 +216,38 @@ do
 	    WRITE_CONFIG=1
 	    ;;
 	(h) usage ;;
-	(l) LIST_ALL_TARGETS=1 ;;
-	(f) LIST_FOUND_TARGETS=1 ;;
-#    (L) show_config_log $OPTARG ;; # Deprecated! use command 'showlog' instead
+	(l) OPT_LIST_ALL_TARGETS=1 ;;
+	(f) OPT_LIST_FOUND_TARGETS=1 ;;
+	(L) OPT_SHOW_CONFIG_LOG=$OPTARG ;; # Deprecated! use command 'showlog' instead
 	(t) targetname=$OPTARG ;;
 	(H) export SBOX_HOME_DIR="$OPTARG" ;;
+	(V) OPT_VERBOSE=1 ;;
 	(v) version ;;
+	(Q) OPT_QUERY_HOME=1 ;;
 	(*) usage ;;
 	esac
 done
 shift $(($OPTIND - 1))
 
+# home dir must be set before any functions are run
 set_sb2_home_dir
 
-[ -n "$LIST_ALL_TARGETS" ] &&  list_targets 1
-[ -n "$LIST_FOUND_TARGETS" ] &&  list_targets 0
+if [ -n "$OPT_LIST_ALL_TARGETS" ]; then
+    list_targets 1
+    exit 0
+fi
+if [ -n "$OPT_LIST_FOUND_TARGETS" ]; then
+    list_targets 0
+    exit 0
+fi
+if [ -n "$OPT_SHOW_CONFIG_LOG" ]; then
+    show_config_log $OPT_SHOW_CONFIG_LOG
+    exit 0
+fi
+if [ -n "$OPT_QUERY_HOME" ]; then
+    echo "$SBOX_HOME_DIR"
+    exit 0
+fi
 
 # Use the default target if "-t target" was not used
 if [ -z "$targetname" ]; then
