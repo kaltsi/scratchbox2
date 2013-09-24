@@ -13,6 +13,7 @@ $ sb2 $0"
 	exit 1
 }
 
+
 [ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
 
 if [ -z "$SBOX_SESSION_DIR" ]; then

@@ -81,7 +81,9 @@ fi
 
 # ---------- end of parameter checks
 
-[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+. $SBOX_DIR/share/scratchbox2/lib/sb2-common
+set_sb2_home_dir
+
 SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$TARGET/sb2.config.d 
 
 # Handle recursive execution gracefully

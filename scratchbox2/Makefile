@@ -156,16 +156,16 @@ install-noarch: regular
 			install -c -m 644 $$f $(prefix)/share/scratchbox2/net_rules/$$d; \
 		done; \
 	done)
-	# "accel" == "devel" mode in 2.3.x:
+# "accel" == "devel" mode in 2.3.x:
 	$(Q)ln -sf accel $(prefix)/share/scratchbox2/modes/devel
-	# Rule libraries
+# Rule libraries
 	$(Q)install -d -m 755 $(prefix)/share/scratchbox2/rule_lib
 	$(Q)install -d -m 755 $(prefix)/share/scratchbox2/rule_lib/fs_rules
 	$(Q)(set -e; for f in $(SRCDIR)/rule_lib/fs_rules/*; do \
 		install -c -m 644 $$f $(prefix)/share/scratchbox2/rule_lib/fs_rules; \
 	done)
-	# "scripts" and "wrappers" are visible to the user in some 
-	# mapping modes, "lib" is for sb2's internal use
+# "scripts" and "wrappers" are visible to the user in some 
+# mapping modes, "lib" is for sb2's internal use
 	$(Q)install -d -m 755 $(prefix)/share/scratchbox2/lib
 	$(Q)install -d -m 755 $(prefix)/share/scratchbox2/scripts
 	$(Q)install -d -m 755 $(prefix)/share/scratchbox2/wrappers
@@ -186,8 +186,8 @@ install-noarch: regular
 	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-build-libtool $(prefix)/bin/sb2-build-libtool
 	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-start-qemuserver $(prefix)/bin/sb2-start-qemuserver
 	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-qemu-gdbserver-prepare $(prefix)/bin/sb2-qemu-gdbserver-prepare
-
 	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-cmp-checkbuilddeps-output.pl $(prefix)/share/scratchbox2/lib/sb2-cmp-checkbuilddeps-output.pl
+	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-common $(prefix)/share/scratchbox2/lib/sb2-common
 
 	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-upgrade-config $(prefix)/share/scratchbox2/scripts/sb2-upgrade-config
 	$(Q)install -c -m 755 $(SRCDIR)/utils/sb2-parse-sb2-init-args $(prefix)/share/scratchbox2/scripts/sb2-parse-sb2-init-args

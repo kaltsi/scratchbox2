@@ -235,11 +235,13 @@ function configure_toolchains()
 }
 
 # ===================== MAIN PROGRAM =====================
-[ -z "$SBOX_HOME_DIR" ] && export SBOX_HOME_DIR=$HOME
-
 if [ -z "$SBOX_DIR" ]; then
 	SBOX_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
 fi
+
+. $SBOX_DIR/share/scratchbox2/lib/sb2-common
+set_sb2_home_dir
+
 SBOX_SHARE_DIR=$SBOX_DIR/share/scratchbox2
 
 # Use an array to preserve spaces in original arguments:

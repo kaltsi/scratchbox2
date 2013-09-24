@@ -172,8 +172,6 @@ esac
 
 # ---------- Check parameters
 
-[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
-
 if [ -z "$SBOX_DIR" ]; then
 	SBOX_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
 fi
@@ -182,6 +180,9 @@ if [ -z "$TARGET" ]; then
         echo "Error: no target given"
         exit 1
 fi
+
+. $SBOX_DIR/share/scratchbox2/lib/sb2-common
+set_sb2_home_dir
 
 
 SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$TARGET/sb2.config.d 

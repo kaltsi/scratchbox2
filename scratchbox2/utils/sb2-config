@@ -184,9 +184,8 @@ function showenv_vars()
 	# else there are none.
 }
 
-[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
-
 SBOX_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
+. $SBOX_DIR/share/scratchbox2/lib/sb2-common
 WRITE_CONFIG=0
 
 if [ $# == 0 ]; then
@@ -207,7 +206,7 @@ do
 	(h) usage ;;
 	(l) LIST_ALL_TARGETS=1 ;;
 	(f) LIST_FOUND_TARGETS=1 ;;
-	(L) show_config_log $OPTARG ;; # Deprecated! use command 'showlog' instead
+#    (L) show_config_log $OPTARG ;; # Deprecated! use command 'showlog' instead
 	(t) targetname=$OPTARG ;;
 	(H) export SBOX_HOME_DIR="$OPTARG" ;;
 	(v) version ;;
@@ -215,6 +214,8 @@ do
 	esac
 done
 shift $(($OPTIND - 1))
+
+set_sb2_home_dir
 
 [ -n "$LIST_ALL_TARGETS" ] &&  list_targets 1
 [ -n "$LIST_FOUND_TARGETS" ] &&  list_targets 0

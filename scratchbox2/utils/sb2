@@ -1604,14 +1604,12 @@ function print_session_logs()
 
 # ===================== MAIN PROGRAM =====================
 
-# first set the home dir for this sb2 invocation
-[ -z "$SBOX_HOME_DIR" ] && export SBOX_HOME_DIR=$HOME
-
 SBOX_MAPMODE=""
 NUM_MAPMODES=0
 SB2_INTERNAL_MAPMODES=""
 
 SBOX_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
+. $SBOX_DIR/share/scratchbox2/lib/sb2-common
 SBOX_WORKDIR=$(readlink -f "$PWD")
 SBOX_ROOT_SIMULATION=""
 SBOX_MODE_SPECIFIC_OPTIONS=""
@@ -1675,6 +1673,7 @@ do
 done
 shift $(($OPTIND - 1))
 
+set_sb2_home_dir
 
 if [ -n "$SBOX_SESSION_DIR" -a -d "$SBOX_SESSION_DIR/rules" ]; then
 	# already inside an sb2 session; ignore all options and just exec the command.

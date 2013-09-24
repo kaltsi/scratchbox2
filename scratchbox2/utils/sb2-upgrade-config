@@ -16,10 +16,14 @@ if [ $(basename $my_path) != $(basename $0) ]; then
 	fi
 fi
 
-[ -z "$SBOX_HOME_DIR" ] && SBOX_HOME_DIR=$HOME
+
 SBOX_SHARE_DIR=$(readlink -f $(dirname $(readlink -f $my_path))/..)
 SBOX_DIR=$(readlink -f $SBOX_SHARE_DIR/../..)
 SBOX_TARGET=$1
+. $SBOX_DIR/share/scratchbox2/lib/sb2-common
+
+set_sb2_home_dir
+
 SBOX_CONFIG_DIR=$SBOX_HOME_DIR/.scratchbox2/$SBOX_TARGET/sb2.config.d 
 
 function exit_error()

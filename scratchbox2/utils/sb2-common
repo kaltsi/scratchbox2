@@ -1,0 +1,39 @@
+# sbox-common - common functions for sb2 scripts
+#
+# Copyright (C) 2013 Jolla Ltd.
+# Contact: Juha Kallioinen <juha.kallioinen@jollamobile.com>
+
+function set_sb2_home_dir()
+{
+    # read and set $SBOX_HOME_DIR for the given username from
+    # ~/.scratchbox2.conf if it exists
+    #
+    # ~/.scratchbox2.conf syntax:
+    #
+    # [username1]
+    # sbox_home=/path/to/sbox_home
+    #
+    # [username2]
+    # sbox_home=/path/to/other/sbox_home
+    #
+    # SBOX_HOME_DIR can be set to relocate the ~/.scratchbox2
+    # directory to a new location
+
+    # don't change the home dir, if it's already set
+    [ ! -z "$SBOX_HOME_DIR" ] && return
+
+    if [ ! -e ~/.scratchbox2.conf ]; then
+	export SBOX_HOME_DIR=$HOME
+    else
+	local sboxhome=$(awk -v username="$USER" -F= '
+  /^\[/ { user=$1; gsub("[][]","",user) }
+  user == username && $1 == "sbox_home" { print $2 }
+' ~/.scratchbox2.conf)
+
+	if [ -z "$sboxhome" ]; then
+	    export SBOX_HOME_DIR=$HOME
+	else
+	    export SBOX_HOME_DIR="$sboxhome"
+	fi
+    fi
+}
